@@ -6,22 +6,22 @@ import 'package:hot_or_not/components/square_tile.dart';
 
 import '../components/my_textfield.dart';
 
-class LoginPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   final Function()? onTap;
-  const LoginPage({super.key, required this.onTap});
+  const RegisterPage({super.key, required this.onTap});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   // text editing controllers
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
-  // sign user in method
-  void signUserIn() async {
+  // sign user up method
+  void signUserUp() async {
 
     // show loading circle
     showDialog(
@@ -33,13 +33,19 @@ class _LoginPageState extends State<LoginPage> {
         }
     );
 
-    // try sign in
+    // try creating user
     try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
+      // check if password is confirmed
+      if (passwordController.text == confirmPasswordController.text){
+        await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+      } else {
+        // show error message, passwords don't match
+        showErrorMessage('Passwords don\'t match');
+      }
       // pop the loading circle
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
@@ -53,18 +59,18 @@ class _LoginPageState extends State<LoginPage> {
   // error message to user
   void showErrorMessage(String message) {
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            backgroundColor: Colors.deepPurple,
-            title: Center(
-                child: Text(
-                    message,
-                  style: const TextStyle(color: Colors.white),
-                ),
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.deepPurple,
+          title: Center(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
             ),
-          );
-        },
+          ),
+        );
+      },
     );
   }
 
@@ -78,28 +84,28 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 50),
+                const SizedBox(height: 15),
 
-              //logo
-              const Icon(
-                Icons.lock,
-                size: 100,
-              ),
+                //logo
+                const Icon(
+                  Icons.lock,
+                  size: 100,
+                ),
 
-              const SizedBox(height: 50),
+                const SizedBox(height: 15),
 
-              // welcome back, you've been missed
+                // lets create an account for you
                 Text(
-                  'Welcome back you\'ve been missed!',
+                  'let\'s create an account for you',
                   style: TextStyle(
-                      color: Colors.grey[700],
+                    color: Colors.grey[700],
                     fontSize: 16,
                   ),
                 ),
 
-              const SizedBox(height: 25),
+                const SizedBox(height: 15),
 
-              //Email textfield
+                //Email textfield
                 MyTextField(
                   controller: emailController,
                   hintText: 'Email',
@@ -108,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 10),
 
-              // password textfield
+                // password textfield
                 MyTextField(
                   controller: passwordController,
                   hintText: 'Password',
@@ -117,14 +123,23 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 10),
 
-              //forgot password
+                // confirm password textfield
+                MyTextField(
+                  controller: confirmPasswordController,
+                  hintText: 'Confirm Password',
+                  obscureText: true,
+                ),
+
+                const SizedBox(height: 10),
+
+                //forgot password
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                          'Forgot Password?',
+                        'Forgot Password?',
                         style: TextStyle(
                           color: Colors.grey[600],
                         ),
@@ -135,29 +150,29 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 10),
 
-              // sign in button
+                // sign in button
                 MyButton(
-                  text: 'Sign In',
-                    onTap: signUserIn,
+                  text: 'Sign Up',
+                  onTap: signUserUp,
                 ),
 
                 const SizedBox(height: 50),
 
-              // or continue with
+                // or continue with
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     children: [
                       Expanded(
-                          child: Divider(
-                            thickness: 0.5,
-                            color: Colors.grey[400],
-                          ),
+                        child: Divider(
+                          thickness: 0.5,
+                          color: Colors.grey[400],
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
-                            'or continue with',
+                          'or continue with',
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ),
@@ -171,15 +186,15 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-              const SizedBox(height: 50),
+                const SizedBox(height: 50),
 
-              // google + apple sign in buttons
+                // google + apple sign in buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     //google button
                     SquareTile(
-                        imagePath: 'lib/images/google.png',
+                      imagePath: 'lib/images/google.png',
                     ),
 
                     SizedBox(width: 25),
@@ -191,14 +206,14 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
 
-              const SizedBox(height: 50),
+                const SizedBox(height: 25),
 
-              // not a member? register now
+                // not a member? register now
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                        'Not a member?',
+                      'Already have an account?',
                       style: TextStyle(color: Colors.grey[700]),
                     ),
 
@@ -207,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                     GestureDetector(
                       onTap: widget.onTap,
                       child: const Text(
-                          'Register now',
+                        'Login now',
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
@@ -216,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 )
-            ],),
+              ],),
           ),
         ),
       ),
